@@ -62,6 +62,8 @@ Thread t;
 
 Thread t2;
 
+float MyResult[3];
+
 EventQueue queue2(32 * EVENTS_EVENT_SIZE);
 
 int m_addr = FXOS8700CQ_SLAVE_ADDR1;
@@ -90,6 +92,17 @@ void check_addr(char *xbee_reply, char *messenger);
 
 
 int main(){
+    uint8_t data[2] ;
+
+   // Enable the FXOS8700Q
+
+   FXOS8700CQ_readRegs( FXOS8700Q_CTRL_REG1, &data[1], 1);
+
+   data[1] |= 0x01;
+
+   data[0] = FXOS8700Q_CTRL_REG1;
+
+   FXOS8700CQ_writeRegs(data, 2);
 
   pc.baud(9600);
 
@@ -167,7 +180,7 @@ int main(){
   xbee.attach(xbee_rx_interrupt, Serial::RxIrq);
 
   while (1) {
-      queue2.event(&getAcc);
+      queue2.call(&getAcc);
       c++;
       wait(0.5);
   }
@@ -178,6 +191,9 @@ void MyPrint(Arguments *in, Reply *out)
 {
     xbee.printf("%d\r\n", c);
     //pc.printf("In MyPrint\r\n");
+    xbee.printf("%1.4f\r\n", MyResult[0]);
+    xbee.printf("%1.4f\r\n", MyResult[1]);
+    xbee.printf("%1.4f\r\n", MyResult[2]);
     c = 0;
 }
 void xbee_rx_interrupt(void)
@@ -194,6 +210,7 @@ void xbee_rx_interrupt(void)
 void xbee_rx(void)
 
 {
+  
 
   char buf[100] = {0};
 
@@ -309,6 +326,10 @@ void getAcc(void) {
       acc16 -= UINT14_MAX;
 
    t[2] = ((float)acc16) / 4096.0f;
+
+   MyResult[0] = t[0];
+   MyResult[1] = t[1];
+   MyResult[2] = t[2];
 
     //c++;
    /*pc.printf("FXOS8700Q ACC: X=%1.4f(%x%x) Y=%1.4f(%x%x) Z=%1.4f(%x%x)",\

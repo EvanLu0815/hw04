@@ -92,6 +92,9 @@ s.write("\r".encode())
 time.sleep(1)
 ind = np.arange(0, 20, 1)
 num = np.zeros(20)
+x = np.zeros(20)
+y = np.zeros(20)
+z = np.zeros(20)
 i = 0
 while (i < 20):
 
@@ -107,15 +110,32 @@ while (i < 20):
 
     num[i] = int(char)
 
+    char = s.readline()
+    # print(char.decode())
+    x[i] = float(char)
+    
+    char = s.readline()
+    # print(char.decode())
+    y[i] = float(char)
+    char = s.readline()
+    # print(char.decode())
+    z[i] = float(char)
+
     i += 1
 
     time.sleep(1)
 
-plt.figure()
-
+plt.figure(1)
 plt.plot(ind, num)
 plt.xlabel('timestamp')
 plt.ylabel('number')
 plt.title('# collected data plot')
+#plt.show()
+plt.figure(2)
+plt.plot(ind, x)
+# hold on
+plt.plot(ind, y)
+plt.plot(ind, z)
+# hold off
 plt.show()
 s.close()
