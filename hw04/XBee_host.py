@@ -179,11 +179,12 @@ while (i < 20):
 
     time.sleep(1)
 
-tile = np.zeros(20)
-
 for i in range (20):
-    tile[i] = (x[i] > 0.707107)| (y[i] > 0.707107)| (x[i] < -0.707107)| (y[i] < -0.707107)
-    mqttc.publish(topic, str(tile[i]))
+    if ((x[i] > 0.707107)| (y[i] > 0.707107)| (x[i] < -0.707107)| (y[i] < -0.707107)):
+        tmp = "1"
+    else:
+        tmp = "0"
+    mqttc.publish(topic, tmp)
     time.sleep(1)
 
 plt.figure()
