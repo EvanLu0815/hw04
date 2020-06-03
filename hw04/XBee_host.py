@@ -6,6 +6,60 @@ import matplotlib.pyplot as plt
 
 import numpy as np
 
+import paho.mqtt.client as paho
+
+mqttc = paho.Client()
+
+
+# Settings for connection
+
+host = "localhost"
+
+topic= "Mbed"
+
+port = 1883
+
+
+# Callbacks
+
+def on_connect(self, mosq, obj, rc):
+
+    print("Connected rc: " + str(rc))
+
+
+def on_message(mosq, obj, msg):
+
+    print("[Received] Topic: " + msg.topic + ", Message: " + str(msg.payload) + "\n");
+
+
+def on_subscribe(mosq, obj, mid, granted_qos):
+
+    print("Subscribed OK")
+
+
+def on_unsubscribe(mosq, obj, mid, granted_qos):
+
+    print("Unsubscribed OK")
+
+
+# Set callbacks
+
+mqttc.on_message = on_message
+
+mqttc.on_connect = on_connect
+
+mqttc.on_subscribe = on_subscribe
+
+mqttc.on_unsubscribe = on_unsubscribe
+
+
+# Connect and subscribe
+
+print("Connecting to " + host + "/" + topic)
+
+mqttc.connect(host, port=1883, keepalive=60)
+
+mqttc.subscribe(topic, 0)
 
 
 # XBee setting
@@ -108,34 +162,34 @@ while (i < 20):
 
     print(char.decode())
 
-    num[i] = int(char)
+    num[i] = int(char.decode())
 
     char = s.readline()
     # print(char.decode())
-    x[i] = float(char)
+    x[i] = float(char.decode())
     
     char = s.readline()
     # print(char.decode())
-    y[i] = float(char)
+    y[i] = float(char.decode())
     char = s.readline()
     # print(char.decode())
-    z[i] = float(char)
+    z[i] = float(char.decode())
 
     i += 1
 
     time.sleep(1)
 
-plt.figure(1)
+tile = np.zeros(20)
+
+for i in range (20):
+    tile[i] = (x[i] > 0.707107)| (y[i] > 0.707107)| (x[i] < -0.707107)| (y[i] < -0.707107)
+    mqttc.publish(topic, str(tile[i]))
+    time.sleep(1)
+
+plt.figure()
 plt.plot(ind, num)
 plt.xlabel('timestamp')
 plt.ylabel('number')
 plt.title('# collected data plot')
-#plt.show()
-plt.figure(2)
-plt.plot(ind, x)
-# hold on
-plt.plot(ind, y)
-plt.plot(ind, z)
-# hold off
 plt.show()
 s.close()
